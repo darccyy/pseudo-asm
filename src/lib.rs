@@ -94,15 +94,19 @@ pub fn run_program(program: Program) {
         let Some(instr) = instrs.get(i) else {
             break;
         };
-        println!("{:?}", instr);
+        // println!("{:?}", instr);
         match instr {
             Instr::Mov(reg, a) => *get!(mut reg) = eval!(a),
             Instr::Add(reg, a) => *get!(mut reg) += eval!(a),
             Instr::Out => println!("{}", get!(const B)),
-            Instr::Jmp(label) => i = *labels.get(label).unwrap(),
+            Instr::Jmp(label) => {
+                i = *labels.get(label).unwrap();
+                continue;
+            }
             Instr::Jif(label) => {
                 if get!(const A) > 0 {
                     i = *labels.get(label).unwrap();
+                    continue;
                 }
             }
             Instr::Cge(a, b) => *get!(const mut A) = if eval!(a) >= eval!(b) { 1 } else { 0 },
@@ -115,12 +119,14 @@ pub fn run_program(program: Program) {
 pub fn parse_program(file: &str) -> Program {
     let mut instrs = Vec::new();
     let mut labels = HashMap::new();
+    let mut line_number = 0;
 
     for line in file.lines() {
         let mut words = split_line(line).into_iter();
         let Some(instr_name) = words.next() else {
             continue;
         };
+        line_number += 1;
 
         if instr_name.starts_with(':') {
             let Some(label) = parse_label(instr_name) else {
@@ -129,7 +135,7 @@ pub fn parse_program(file: &str) -> Program {
             if labels.contains_key(&label) {
                 panic!("label already exists: `{}`", label.0);
             }
-            labels.insert(label, instrs.len() + 1);
+            labels.insert(label, line_number - 1);
             continue;
         }
 

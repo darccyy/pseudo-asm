@@ -14,8 +14,10 @@ add 'i 1      . i += 1
 jmp :l1       . goto :l1
 :l2
 
-. a b c d e f g h
-. i j k l m n o p
+. reserved
+.   a b c d e f g h
+. free use
+.   i j k l m n o p
 
 . 'a  comparision return
 . 'b  print value
